@@ -67,13 +67,19 @@ export class AppInterface {
       this.getDestinationURL()
     );
   }
-  update(key, value) {
+  sendMessageType(type, key, value) {
     this.postMessage({
-      type: "update",
+      type: type,
       data: {
         key,
         value,
       },
-    });
+    })
+  }
+  update(key, value) {
+    this.sendMessageType('update', key, value)
+  }
+  announce(message) {
+    this.sendMessageType('announce', 'message', message)
   }
 }
