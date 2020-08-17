@@ -14,6 +14,7 @@ export class AppInterface {
     }
     this.onChange = createSignal();
     this.onLoad = createSignal();
+    this.onGetPlayersPromises = [];
     this.receivedInitialState = false;
     window.addEventListener("message", this._onMessage.bind(this));
   }
@@ -25,6 +26,18 @@ export class AppInterface {
       ? AppInterface.DEV_DESTINATION_URL
       : AppInterface.PROD_DESTINATION_URL;
   }
+  async getPlayers() {
+    this.postMessage({ type: "get_players" });
+    const promiseObj = {};
+    // FIXME: I'm likely abusing promises here -- what's the right way?
+    const newPromise = new Promise((resolve, reject) => {
+      promiseObj.resolve = resolve;
+      promiseObj.reject = reject;
+    });
+    promiseObj.promise = newPromise;
+    this.onGetPlayersPromises.push(promiseObj);
+    return newPromise;
+  }
   _onMessage(message) {
     if (message.origin !== this.getDestinationURL()) {
       return;
@@ -35,6 +48,11 @@ export class AppInterface {
     } else if (message.data.type === "load") {
       this.receivedInitialState = true;
       this.onLoad.invoke(message.data.data);
+    } else if (message.data.type === "get_players") {
+      this.onGetPlayersPromises.forEach((promiseObj) => {
+        promiseObj.resolve(message.data);
+        this.onGetPlayersPromises = [];
+      });
     }
   }
   postMessage(data) {
