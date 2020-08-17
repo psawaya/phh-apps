@@ -1,6 +1,7 @@
 <script>
   import Icebreaker from "./Icebreaker.svelte";
   import TV from "./Tv.svelte";
+  import Cards from "./Cards.svelte";
   import { AppInterface } from "./AppInterface";
 
   const urlParams = new URLSearchParams(window.location.search);
@@ -19,4 +20,6 @@
   <Icebreaker />
 {:else if appName === 'tv'}
   <TV />
+  {:else if appName === 'cards'}
+    <Cards />
 {/if}
