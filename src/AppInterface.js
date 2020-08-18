@@ -74,12 +74,12 @@ export class AppInterface {
         key,
         value,
       },
-    })
+    });
   }
   update(key, value) {
-    this.sendMessageType('update', key, value)
+    this.sendMessageType("update", key, value);
   }
   announce(message) {
-    this.sendMessageType('announce', 'message', message)
+    this.sendMessageType("announce", "message", message);
   }
 }
