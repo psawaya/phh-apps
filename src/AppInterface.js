@@ -27,7 +27,7 @@ export class AppInterface {
       : AppInterface.PROD_DESTINATION_URL;
   }
   async getPlayers() {
-    this.postMessage({ type: "get_players" });
+    this.sendMessageType("get_players");
     const promiseObj = {};
     // FIXME: I'm likely abusing promises here -- what's the right way?
     const newPromise = new Promise((resolve, reject) => {
