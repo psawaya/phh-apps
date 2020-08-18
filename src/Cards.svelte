@@ -29,6 +29,7 @@
     if (card1 > card2) {
         if (guess == "higher") {
             streak++;
+            score++;
             appInterface.update("streak", streak);
         }
         else {
@@ -41,6 +42,7 @@
     else if (card1 < card2) {
         if (guess == "lower") {
             streak++;
+            score++;
             appInterface.update("streak", streak);
         }
         else {
@@ -53,8 +55,11 @@
     else if (card1 == card2) {
         // DO SOMETHING IN THE EVENT OF A TIE
     }
+    guess = null;
+    appInterface.update("guess", null);
     if (streak > 2 ) {
         gameOver = true;
+        score = score - 3;
         appInterface.update("gameOver", true);
     }
   }
@@ -82,13 +87,13 @@
   }
   function resetGame() {
     streak = 0;
-    score = 0;
+    score = 3;
     cardLast = null;
     gameOver = false;
     guess = null;
     appInterface.update("streak", 0);
-    appInterface.update("score", 0);
     appInterface.update("cardLast", null);
+    appInterface.update("score", score);
     appInterface.update("guess", null);
     appInterface.update("gameOver", false);
   }
@@ -102,9 +107,7 @@
     appInterface.update("guess", "lower");
   }
   function updateCard(state) {
-    if (state.gameOver) {
-      gameOver = state.gameOver;
-    }
+    gameOver = state.gameOver;
     if (state.cardNext) {
       cardNext = state.cardNext;
     }
@@ -164,24 +167,7 @@
           </div>
       {/if}
       {#if !gameOver}
-          {#if streak}
-              <div style="display:inline-block">
-                 <h2>{streak}</h2>
-                 <h4 style="margin:0;text-align: center;">Streak</h4>
-              </div>
-          {/if}
-          {#if score}
-              <div style="display:inline-block">
-                 <h2>{score}</h2>
-                 <h4 style="margin:0;text-align: center;">Score</h4>
-             </div>
-          {/if}
-          {#if guess}
-             <div style="display:inline-block">
-                 <h2>{guess}</h2>
-                 <h4 style="margin:0;text-align: center;">Guess</h4>
-             </div>
-          {/if}
+
       {/if}
       {#if gameOver}
             <div style="display:inline-block">
@@ -194,6 +180,23 @@
                    Play Again
                 </button>
            </div>
+      {:else}
+            <div style="display:inline-block">
+                <h2>{streak}</h2>
+                <h4 style="margin:0;text-align: center;">Streak</h4>
+            </div>
+            {#if score}
+                <div style="display:inline-block">
+                    <h2>{score}</h2>
+                    <h4 style="margin:0;text-align: center;">Score</h4>
+                </div>
+            {/if}
+            {#if guess}
+                 <div style="display:inline-block">
+                     <h2>{guess}</h2>
+                     <h4 style="margin:0;text-align: center;">Guess</h4>
+                 </div>
+            {/if}
       {/if}
   </div>
 {/if}
