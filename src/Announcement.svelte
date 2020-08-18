@@ -1,19 +1,19 @@
 <script>
-  import { AppInterface } from './AppInterface'
-  import App from './App.svelte'
+  import { AppInterface } from "./AppInterface";
+  import App from "./App.svelte";
 
-  const appInterface = new AppInterface()
-  let loaded = false
+  const appInterface = new AppInterface();
+  let loaded = false;
 
   function handleAnnouncement() {
-    var message = prompt('Make an announcement', '')
+    var message = prompt("Make an announcement", "");
     if (message) {
-      appInterface.announce(message)
+      appInterface.announce(message);
     }
   }
   appInterface.onLoad((state) => {
-    loaded = true
-  })
+    loaded = true;
+  });
 </script>
 
 {#if !loaded}
