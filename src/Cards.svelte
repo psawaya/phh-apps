@@ -16,6 +16,7 @@
   let players = [];
   let filtered = [];
   let currentPlayer = null;
+  let localPlayer = null;
 
   function draw () {
     fetch('https://deckofcardsapi.com/api/deck/new/draw/')
@@ -101,6 +102,7 @@
     appInterface.update("score", score);
     appInterface.update("guess", null);
     appInterface.update("gameOver", false);
+    nextPlayer();
   }
   // I'm sure there is a way to combine these two functions...
   function guessHigher() {
@@ -119,7 +121,6 @@
         currentPlayer = 0;
     }
     appInterface.update("currentPlayer", currentPlayer);
-
   }
   function updateCard(state) {
     loadPlayers();
@@ -134,16 +135,11 @@
     if (state.cardLast) {
       cardLast = state.cardLast;
     }
-    if (state.guess) {
-      guess = state.guess;
-    }
     if (state.score) {
       score = state.score;
     }
-    if (state.streak) {
-      streak = state.streak;
-    }
-
+    streak = state.streak;
+    guess = state.guess;
   }
   appInterface.onChange(updateCard);
   appInterface.onLoad((state) => {
@@ -158,6 +154,7 @@
        return x !== undefined;
     });
     arePlayersLoaded = true;
+    localPlayer = filtered.find(player => player.localPlayer == true);
   }
 </script>
 
@@ -169,30 +166,32 @@
         Loading...
       {:else}
           <div style="display:inline-block">
-              <button on:click={nextPlayer}>
-                  <b>Next Player</b>
-              </button>
               <b style="display:block;">{#if filtered[currentPlayer]}{filtered[currentPlayer].name}{:else}EMPTY{/if}'s Turn!</b>
+              {#if filtered[currentPlayer].id == localPlayer.id}
+                {#if !gameOver}
+                  {#if cardNext}
+                    <div style="display:inline-block; margin-right: 10px;">
+                      <button on:click={guessHigher}>
+                        Higher
+                      </button>
+                    </div>
+                    <div style="display:inline-block; margin-right: 10px;">
+                        <button on:click={guessLower}>
+                          Lower
+                        </button>
+                      </div>
+                  {/if}
+                {/if}
+              {:else}
+                {#if !gameOver}
+                  <div style="display:inline-block; margin-right: 10px;">
+                    <button on:click={draw}>
+                        <b>Draw</b>
+                    </button>
+                  </div>
+                {/if}
+              {/if}
           </div>
-      {/if}
-      {#if !gameOver}
-          <div style="display:inline-block; margin-right: 10px;">
-            <button on:click={draw}>
-                <b>Draw</b>
-            </button>
-          </div>
-          {#if cardNext}
-            <div style="display:inline-block; margin-right: 10px;">
-              <button on:click={guessHigher}>
-                Higher
-              </button>
-            </div>
-            <div style="display:inline-block; margin-right: 10px;">
-                <button on:click={guessLower}>
-                  Lower
-                </button>
-              </div>
-          {/if}
       {/if}
       {#if cardNext}
           <div style="display:inline-block; margin-right: 10px;">
@@ -222,7 +221,7 @@
            </div>
       {:else}
             <div style="display:inline-block">
-                <h2>{streak}</h2>
+                <h2 style="margin:0;">{streak}</h2>
                 <h4 style="margin:0;text-align: center;">Streak</h4>
             </div>
             {#if score}
