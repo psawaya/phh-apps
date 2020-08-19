@@ -4,6 +4,7 @@
 
   const appInterface = new AppInterface();
   let loaded = false;
+  let arePlayersLoaded = false;
 
   let cardNext = null;
   let cardLast = null;
@@ -11,6 +12,11 @@
   let streak = 0;
   let score = 0;
   let gameOver = false;
+
+  let players = [];
+  let filtered = [];
+  let currentPlayer = null;
+  let localPlayer = null;
 
   function draw () {
     fetch('https://deckofcardsapi.com/api/deck/new/draw/')
@@ -96,6 +102,7 @@
     appInterface.update("score", score);
     appInterface.update("guess", null);
     appInterface.update("gameOver", false);
+    nextPlayer();
   }
   // I'm sure there is a way to combine these two functions...
   function guessHigher() {
@@ -106,53 +113,85 @@
     guess= "lower";
     appInterface.update("guess", "lower");
   }
+  function nextPlayer() {
+    if (currentPlayer < (filtered.length - 1)) {
+        currentPlayer++;
+    }
+    else {
+        currentPlayer = 0;
+    }
+    appInterface.update("currentPlayer", currentPlayer);
+  }
   function updateCard(state) {
+    loadPlayers();
     gameOver = state.gameOver;
+    currentPlayer = state.currentPlayer;
+    if (currentPlayer == null) {
+        nextPlayer();
+    }
     if (state.cardNext) {
       cardNext = state.cardNext;
     }
     if (state.cardLast) {
       cardLast = state.cardLast;
     }
-    if (state.guess) {
-      guess = state.guess;
-    }
     if (state.score) {
       score = state.score;
     }
-    if (state.streak) {
-      streak = state.streak;
-    }
+    streak = state.streak;
+    guess = state.guess;
   }
   appInterface.onChange(updateCard);
   appInterface.onLoad((state) => {
     updateCard(state);
+    loadPlayers();
     loaded = true;
   });
+  async function loadPlayers() {
+    players = await appInterface.getPlayers();
+    var filteredList = players.data;
+    filtered = filteredList.filter(function(x) {
+       return x !== undefined;
+    });
+    arePlayersLoaded = true;
+    localPlayer = filtered.find(player => player.localPlayer == true);
+  }
 </script>
 
 {#if !loaded}
   <div>Loading...</div>
 {:else}
   <div style="height: 150px">
-      {#if !gameOver}
-          <div style="display:inline-block; margin-right: 10px;">
-            <button on:click={draw}>
-                <b>Draw</b>
-            </button>
+      {#if !arePlayersLoaded}
+        Loading...
+      {:else}
+          <div style="display:inline-block">
+              <b style="display:block;">{#if filtered[currentPlayer]}{filtered[currentPlayer].name}{:else}EMPTY{/if}'s Turn!</b>
+              {#if filtered[currentPlayer].id == localPlayer.id}
+                {#if !gameOver}
+                  {#if cardNext}
+                    <div style="display:inline-block; margin-right: 10px;">
+                      <button on:click={guessHigher}>
+                        Higher
+                      </button>
+                    </div>
+                    <div style="display:inline-block; margin-right: 10px;">
+                        <button on:click={guessLower}>
+                          Lower
+                        </button>
+                      </div>
+                  {/if}
+                {/if}
+              {:else}
+                {#if !gameOver}
+                  <div style="display:inline-block; margin-right: 10px;">
+                    <button on:click={draw}>
+                        <b>Draw</b>
+                    </button>
+                  </div>
+                {/if}
+              {/if}
           </div>
-          {#if cardNext}
-            <div style="display:inline-block; margin-right: 10px;">
-              <button on:click={guessHigher}>
-                Higher
-              </button>
-            </div>
-            <div style="display:inline-block; margin-right: 10px;">
-                <button on:click={guessLower}>
-                  Lower
-                </button>
-              </div>
-          {/if}
       {/if}
       {#if cardNext}
           <div style="display:inline-block; margin-right: 10px;">
@@ -182,18 +221,18 @@
            </div>
       {:else}
             <div style="display:inline-block">
-                <h2>{streak}</h2>
+                <h2 style="margin:0;">{streak}</h2>
                 <h4 style="margin:0;text-align: center;">Streak</h4>
             </div>
             {#if score}
                 <div style="display:inline-block">
-                    <h2>{score}</h2>
+                    <h2 style="margin:0;">{score}</h2>
                     <h4 style="margin:0;text-align: center;">Score</h4>
                 </div>
             {/if}
             {#if guess}
                  <div style="display:inline-block">
-                     <h2>{guess}</h2>
+                     <h2 style="margin:0;">{guess}</h2>
                      <h4 style="margin:0;text-align: center;">Guess</h4>
                  </div>
             {/if}
