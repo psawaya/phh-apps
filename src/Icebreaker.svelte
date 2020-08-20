@@ -10,11 +10,14 @@
   let currentQuestion = null;
   let loaded = false;
 
+  let players = [];
+
   function newQuestion() {
     currentQuestion = _.sample(ICEBREAKER_QUESTIONS);
     appInterface.update("currentQuestion", currentQuestion);
   }
   function updateQuestion(state) {
+    loadPlayers();
     if (state.currentQuestion) {
       currentQuestion = state.currentQuestion;
     }
@@ -23,8 +26,13 @@
   appInterface.onLoad((state) => {
     updateQuestion(state);
 
+    loadPlayers();
     loaded = true;
   });
+
+  async function loadPlayers() {
+    players = await appInterface.getPlayers();
+  }
 </script>
 
 {#if !loaded}
