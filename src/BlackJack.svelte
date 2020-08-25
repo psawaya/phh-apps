@@ -55,9 +55,11 @@
         for(var i = 0; i < filtered.length; i++)
                {
                    var hand = new Array();
-                   var player = { name: filtered[i].name, points: 0, hand: hand, result: null };
+                   var player = { name: filtered[i].name, id: filtered[i].id, points: 0, hand: hand, result: null };
+                   console.log(filtered[i].name, filtered[i].id);
                    gamePlayers.push(player);
                }
+               console.log("gamePlayers.....", gamePlayers);
     }
 
     function dealHands(){
@@ -94,6 +96,7 @@
             appInterface.update("deck", deck);
         }
     function stay() {
+        console.log("staying....");
         nextPlayer();
     }
     function updatePoints () {
@@ -130,14 +133,14 @@
     }
       function nextPlayer() {
         console.log("next player........");
-        if (currentPlayer < (filtered.length - 1)) {
+        if (currentPlayer < (gamePlayers.length - 1)) {
             currentPlayer++;
             updatePoints();
+            appInterface.update("currentPlayer", currentPlayer);
         }
         else {
             checkDealer();
         }
-        appInterface.update("currentPlayer", currentPlayer);
 
       }
     function checkDealer() {
@@ -212,16 +215,16 @@
         appInterface.update("gamePlayers", []);
         appInterface.update("deck", []);
         appInterface.update("dealer", {points: 0, hand: []});
+        currentPlayer = 0;
+        appInterface.update("currentPlayer", currentPlayer);
         createDeck();
         shuffle();
         createPlayers();
         dealHands();
-        currentPlayer = 0;
         updatePoints();
         appInterface.update("gameState", "on");
         appInterface.update("gamePlayers", gamePlayers);
         appInterface.update("dealer", dealer);
-        appInterface.update("currentPlayer", 0);
         console.log("restarting game........");
     }
   function updateGame(state) {
@@ -238,6 +241,10 @@
         if (state.deck) {
             deck = state.deck;
         }
+        if (state.currentPlayer) {
+            currentPlayer = state.currentPlayer;
+        }
+        currentPlayer = state.currentPlayer;
     }
   appInterface.onChange(updateGame);
   appInterface.onLoad((state) => {
@@ -256,6 +263,9 @@
   }
 </script>
 
+
+
+<div class="container">
 {#if !loaded}
   <div>Loading...</div>
 {:else}
@@ -264,20 +274,23 @@
         Loading...
       {:else}
 
-
+              <b>{currentPlayer}</b>
              {#if gameState == "off"}
              <button on:click={restartGame}>
                 RESTART
              </button>
+
             {:else}
 
-                 <button on:click={hitMe}>
-                     HIT ME
-                </button>
-                <button on:click={stay}>
-                     STAY
-                </button>
-                <b>{gamePlayers[currentPlayer].name}'s turn</b>
+                {#if filtered[currentPlayer].id == localPlayer.id}
+                     <button on:click={hitMe}>
+                         HIT ME
+                    </button>
+                    <button on:click={stay}>
+                         STAY
+                    </button>
+                {/if}
+                <b>{currentPlayer}: {gamePlayers[currentPlayer].name}'s turn</b>
              {/if}
              {#each gamePlayers as player}
                 <p>
@@ -303,3 +316,4 @@
       {/if}
   </div>
 {/if}
+</div>
