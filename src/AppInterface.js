@@ -27,7 +27,7 @@ export class AppInterface {
       : AppInterface.PROD_DESTINATION_URL;
   }
   async getPlayers() {
-    this.postMessage({ type: "get_players" });
+    this.sendMessageType("get_players");
     const promiseObj = {};
     // FIXME: I'm likely abusing promises here -- what's the right way?
     const newPromise = new Promise((resolve, reject) => {
@@ -67,13 +67,19 @@ export class AppInterface {
       this.getDestinationURL()
     );
   }
-  update(key, value) {
+  sendMessageType(type, key, value) {
     this.postMessage({
-      type: "update",
+      type: type,
       data: {
         key,
         value,
       },
     });
+  }
+  update(key, value) {
+    this.sendMessageType("update", key, value);
+  }
+  announce(message) {
+    this.sendMessageType("announce", "message", message);
   }
 }

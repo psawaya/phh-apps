@@ -1,4 +1,5 @@
 <script>
+  import Announcement from "./Announcement.svelte";
   import Icebreaker from "./Icebreaker.svelte";
   import TV from "./Tv.svelte";
   import Cards from "./Cards.svelte";
@@ -20,6 +21,8 @@
   <Icebreaker />
 {:else if appName === 'tv'}
   <TV />
-  {:else if appName === 'cards'}
-    <Cards />
+{:else if appName === 'announcement'}
+  <Announcement />
+{:else if appName === 'cards'}
+  <Cards />
 {/if}
