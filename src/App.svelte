@@ -3,6 +3,7 @@
   import Icebreaker from "./Icebreaker.svelte";
   import TV from "./Tv.svelte";
   import Cards from "./Cards.svelte";
+  import Blackjack from "./Blackjack.svelte";
   import { AppInterface } from "./AppInterface";
 
   const urlParams = new URLSearchParams(window.location.search);
@@ -25,4 +26,8 @@
   <Announcement />
 {:else if appName === 'cards'}
   <Cards />
+{:else if appName === 'cards'}
+  <Cards />
+{:else if appName === 'blackjack'}
+  <Blackjack />
 {/if}
