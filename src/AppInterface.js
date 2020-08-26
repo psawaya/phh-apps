@@ -50,7 +50,7 @@ export class AppInterface {
       this.onLoad.invoke(message.data.data);
     } else if (message.data.type === "get_players") {
       this.onGetPlayersPromises.forEach((promiseObj) => {
-        promiseObj.resolve(message.data);
+        promiseObj.resolve(message.data.data);
         this.onGetPlayersPromises = [];
       });
     }
