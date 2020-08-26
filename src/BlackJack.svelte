@@ -263,56 +263,142 @@
   }
 </script>
 
+<style>
+    body {
+        padding: 0;
+    }
+    .container {
+        background-color: #038046;
+        font-size: 12px;
+        width: 100%;
+        height: 140px;
+        border-radius: 10px;
+    }
+    .header {
+        width: 100%;
+        color: white;
+        padding: 5px;
+    }
+    .player {
+        color: white;
+        float: left;
+        min-width: 85px;
+        min-height: 100px;
+        text-align: center;
+        border: solid 1px white;
+        margin: 10px;
+        border-radius: 5px;
+        padding: 5px;
+    }
+    .player b {
+        display: block;
+        text-align: center;
+        margin-bottom: 5px;
+    }
+    .dealer {
+        border-width: 3px;
+    }
+    .card {
+        height: 50px;
+        margin-right: 5px;
+    }
+    .controls {
+        margin-top: 5px;
+    }
+    .controls button {
+        background-color: whitemoke;
+        border: none;
+        font-weight: 600;
+        margin-bottom: 0;
+        padding: 1px 5px;
+        font-size: 12px;
+    }
+    .admin {
+        border-color: darkgreen;
+        color: darkgreen;
+    }
+    .admin button {
+        border-color: darkgreen;
+        background: #038046;
+        color: darkgreen;
+    }
 
+</style>
 
 <div class="container">
 {#if !loaded}
   <div>Loading...</div>
 {:else}
-  <div style="font-size:12px;">
+  <div>
       {#if !arePlayersLoaded}
         Loading...
       {:else}
-
-              <b>{currentPlayer}</b>
+            <div class="player dealer">
+             <b>BLACKJACK</b>
              {#if gameState == "off"}
              <button on:click={restartGame}>
-                RESTART
+                START
              </button>
 
             {:else}
-
-                {#if filtered[currentPlayer].id == localPlayer.id}
-                     <button on:click={hitMe}>
-                         HIT ME
-                    </button>
-                    <button on:click={stay}>
-                         STAY
-                    </button>
-                {/if}
-                <b>{currentPlayer}: {gamePlayers[currentPlayer].name}'s turn</b>
+                <b>{gamePlayers[currentPlayer].name}'s turn</b>
              {/if}
+             </div>
              {#each gamePlayers as player}
-                <p>
-                {player.name} - {player.points} - {player.result}
+                <div class="player">
+                    <b>{player.name} - {player.points}</b>
+
                     {#each player.hand as hand}
                         {#if hand.value == 10}
-                             {hand.value}{hand.suit}, {hand.weight} - <img src="https://deckofcardsapi.com/static/img/0{hand.suit}.png" height="30">
+                             <img class="card" src="https://deckofcardsapi.com/static/img/0{hand.suit}.png">
                         {:else}
-                         {hand.value}{hand.suit}, {hand.weight} - <img src="https://deckofcardsapi.com/static/img/{hand.value}{hand.suit}.png" height="30">
+                             <img class="card" src="https://deckofcardsapi.com/static/img/{hand.value}{hand.suit}.png">
                         {/if}
                     {/each}
-                </p>
-             {/each}
-             <b>dealer - {dealer.points}</b>
-             {#each dealer.hand as card}
-                    {#if card.value == 10}
-                      {card.value}{card.suit}, {card.weight} - <img src="https://deckofcardsapi.com/static/img/0{card.suit}.png" height="30">
-                    {:else}
-                      {card.value}{card.suit}, {card.weight} - <img src="https://deckofcardsapi.com/static/img/{card.value}{card.suit}.png" height="30">
+                     <b>{#if player.result}{player.result}{/if}</b>
+                    {#if gamePlayers[currentPlayer].id == localPlayer.id}
+                        {#if player.id == localPlayer.id}
+                            <div class="controls">
+                                 <button on:click={hitMe}>
+                                     Hit
+                                </button>
+                                <button on:click={stay}>
+                                     Stay
+                                </button>
+                            </div>
+                        {/if}
                     {/if}
-             {/each}
 
+                </div>
+             {/each}
+             <div class="player dealer">
+                 {#if dealer.points}
+                     <b>dealer - {dealer.points}</b>
+                     {#each dealer.hand as card}
+                            {#if card.value == 10}
+                              <img class="card" src="https://deckofcardsapi.com/static/img/0{card.suit}.png">
+                            {:else}
+                              <img class="card" src="https://deckofcardsapi.com/static/img/{card.value}{card.suit}.png" >
+                            {/if}
+                     {/each}
+                 {:else}
+                    <b>dealer</b>
+                    {#if dealer.hand[0]}
+                        {#if dealer.hand[0].value == 10}
+                          <img class="card" src="https://deckofcardsapi.com/static/img/0{dealer.hand[0].suit}.png">
+                        {:else}
+                          <img class="card" src="https://deckofcardsapi.com/static/img/{dealer.hand[0].value}{dealer.hand[0].suit}.png" >
+                        {/if}
+                    {/if}
+                {/if}
+            </div>
+            <div class="player admin">
+                 <p>ADMIN </p>
+                    <p>Don't press this<br> unless you're stuck.</p>
+                    <button on:click={nextPlayer}>
+                         Next Player
+                    </button>
+            </div>
       {/if}
   </div>
 {/if}
