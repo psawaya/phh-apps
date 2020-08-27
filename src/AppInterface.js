@@ -1,3 +1,4 @@
+// import Automerge from "automerge";
 import { createSignal } from "strong-events";
 
 export class AppInterface {
@@ -47,6 +48,9 @@ export class AppInterface {
       this.onChange.invoke(message.data.data, message.data.changes);
     } else if (message.data.type === "load") {
       this.receivedInitialState = true;
+      // this.automergeDoc = Automerge.from(
+      //   JSON.parse(message.data.automergeData)
+      // );
       this.onLoad.invoke(message.data.data);
     } else if (message.data.type === "get_players") {
       this.onGetPlayersPromises.forEach((promiseObj) => {
@@ -67,6 +71,9 @@ export class AppInterface {
       this.getDestinationURL()
     );
   }
+  setFrameHeight(height) {
+    this.sendMessageType("set_frame_height", "height", height);
+  }
   sendMessageType(type, key, value) {
     this.postMessage({
       type: type,
@@ -78,6 +85,13 @@ export class AppInterface {
   }
   update(key, value) {
     this.sendMessageType("update", key, value);
+  }
+  updateAutomerge(cb) {
+    // const newDoc = Automerge.change(this.automergeDoc, cb);
+    // const changes = Automerge.getChanges(this.automergeDoc, newDoc);
+    // this.sendMessageType("update_automerge", "changes", changes);
+    // // TODO: Is it sufficient to just do this.automergeDoc = newDoc?
+    // this.automergeDoc = Automerge.applyChanges(this.automergeDoc, changes);
   }
   announce(message) {
     this.sendMessageType("announce", "message", message);

@@ -19,6 +19,7 @@
     "svelte": "^3.0.0"
   },
   "dependencies": {
+    "automerge": "^0.14.1",
     "express": "^4.17.1",
     "lodash": "^4.17.19",
     "sirv": "^1.0.5",

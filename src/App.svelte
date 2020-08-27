@@ -4,6 +4,7 @@
   import TV from "./Tv.svelte";
   import Cards from "./Cards.svelte";
   import Blackjack from "./Blackjack.svelte";
+  import Madlibs from "./madlibs/MadlibsMain.svelte";
   import { AppInterface } from "./AppInterface";
 
   const urlParams = new URLSearchParams(window.location.search);
@@ -30,4 +31,8 @@
   <Cards />
 {:else if appName === 'blackjack'}
   <Blackjack />
+{:else if appName === 'cards'}
+  <Cards />
+{:else if appName === 'madlibs'}
+  <Madlibs />
 {/if}
