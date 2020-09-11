@@ -65,7 +65,7 @@
   appInterface.onChange(updatePlaying);
   appInterface.onLoad((state) => {
     updatePlaying(state);
-
+    appInterface.setFrameHeight(350);
     loadPlayers();
     loaded = true;
   });
@@ -137,48 +137,55 @@ function updateState() {
 
 </script>
 
+<style>
+    input {
+        transform: scale(2);
+        display: inline-block;
+        width: 30px;
+        margin: 20px 10px;
+    }
+</style>
+
 {#if !loaded}
   <div>Loading...</div>
 {:else}
     <pre>
+        <hr>
+        <b>snare</b>
+        {#each items as item}
 
+                <input
+                    type="checkbox"
+                    bind:group={selectedSnare}
+                    on:change={updateState}
+                    value={item}
+                    style
+                />
 
-    {#each items as item}
-    	<label>
-    		<input
-    			type="checkbox"
-    			bind:group={selectedSnare}
-                on:change={updateState}
-    			value={item}
-    		/> {item}
-    	</label>
-    {/each}
-    Snare: {selectedSnare && selectedSnare.join(', ')}
+        {/each}
+        <b>Bass</b>
+        {#each itemsBass as item}
 
-    {#each itemsBass as item}
-        	<label>
         		<input
         			type="checkbox"
         			bind:group={selectedBass}
         			on:change={updateState}
         			value={item}
-        		/> {item}
-        	</label>
+        		/>
+
         {/each}
-        Bass: {selectedBass && selectedBass.join(', ')}
-
+        <b>Hi Hat</b>
         {#each itemsHat as item}
-                	<label>
-                		<input
-                			type="checkbox"
-                			bind:group={selectedHat}
-                            on:change={updateState}
-                			value={item}
-                		/> {item}
-                	</label>
-                {/each}
-                Hat: {selectedHat && selectedHat.join(', ')}
 
+                <input
+                    type="checkbox"
+                    bind:group={selectedHat}
+                    on:change={updateState}
+                    value={item}
+                />
+
+        {/each}
+        <hr>
     </pre>
   {#if playing}
     MUSIC!
