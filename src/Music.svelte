@@ -14,7 +14,7 @@
   let players = [];
   let localPlayer = null;
   let timer = 0;
-  let tempo = 120;
+  let tempo = 150;
 
   	let selectedSnare = [];
       let selectedBass = [];
@@ -75,7 +75,7 @@
   appInterface.onChange(updatePlaying);
   appInterface.onLoad((state) => {
     updatePlaying(state);
-    appInterface.setFrameHeight(450);
+    appInterface.setFrameHeight(300);
     loadPlayers();
     loaded = true;
   });
@@ -176,14 +176,21 @@ function clearChecks() {
 </script>
 
 <style>
+    input {
+            margin: 20px 10px;
+    }
     input[type="checkbox"] {
         transform: scale(2);
         display: inline-block;
         width: 30px;
-        margin: 20px 10px;
+
     }
     .active {
         transform: scale(2.5) !important;
+    }
+    b {
+        display: inline-block;
+        width: 60px;
     }
 </style>
 
@@ -191,8 +198,8 @@ function clearChecks() {
   <div>Loading...</div>
 {:else}
 <button on:click={playPause}>
-        <b>&#9658;&nbsp; &#10074; &#10074;</b>
-  </button> {#if playing}
+        &#9658;&nbsp; &#10074; &#10074;
+  </button> &nbsp;{#if playing}
                Playing...
              {/if}<br>
           <b>BPM</b>
@@ -201,11 +208,10 @@ function clearChecks() {
               bind:value={tempo}
               on:change={setTheInt}
           >
-        <pre>
-          <hr>
-        <b>snare</b>
-        {#each items as item}
+    <div>
 
+        <b>Snare</b>
+        {#each items as item}
                 <input
                     type="checkbox"
                     bind:group={selectedSnare}
@@ -213,11 +219,9 @@ function clearChecks() {
                     value={item}
                     class:active="{timer==item}"
                 />
-
-        {/each}
+        {/each}<br>
         <b>Bass</b>
         {#each itemsBass as item}
-
         		<input
         			type="checkbox"
         			bind:group={selectedBass}
@@ -225,11 +229,9 @@ function clearChecks() {
         			value={item}
                     class:active="{timer==item}"
         		/>
-
-        {/each}
+        {/each}<br>
         <b>Hi Hat</b>
         {#each itemsHat as item}
-
                 <input
                     type="checkbox"
                     bind:group={selectedHat}
@@ -237,10 +239,10 @@ function clearChecks() {
                     value={item}
                     class:active="{timer==item}"
                 />
+        {/each}<br>
 
-        {/each}
-        <hr>
-    </pre>
+
+    </div>
     <!--
             debug
           <button on:click={clearInt}>
