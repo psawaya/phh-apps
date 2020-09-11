@@ -57,9 +57,15 @@
     if (state.timer) {
       timer = state.timer;
       }
-    selectedSnare = state.selectedSnare;
+      if (state.selectedSnare) {
+        selectedSnare = state.selectedSnare;
+      }
+      if (state.selectedBass) {
     selectedBass = state.selectedBass;
-    selectedHat = state.selectedHat;
+    }
+    if (state.selectedHat) {
+      selectedHat = state.selectedHat;
+  }
 
 }
   appInterface.onChange(updatePlaying);
