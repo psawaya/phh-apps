@@ -227,21 +227,17 @@
   span {
     width: 150px;
     display: inline-block;
-   }
-
-
+  }
    input[type=checkbox] + label {
      display: inline-block;
      margin: 4px 0;
      cursor: pointer;
      padding: 0;
-   }
-
-   input[type=checkbox] {
+  }
+  input[type=checkbox] {
      display: none;
-   }
-
-   input[type=checkbox] + label:before {
+  }
+  input[type=checkbox] + label:before {
      content: "";
      background-color: #f9f0d6;
      border: 0.1em solid #e6dcc0;
@@ -255,41 +251,38 @@
      vertical-align: bottom;
      color: transparent;
      transition: .2s;
-   }
-
-   input[type=checkbox] + label:hover:before {
+  }
+  input[type=checkbox] + label:hover:before {
         background-color: #e6dcc0;
-    }
-
-   input[type=checkbox] + label:active:before {
+  }
+  input[type=checkbox] + label:active:before {
      transform: scale(0);
-   }
-
-   input[type=checkbox]:checked + label:before {
+  }
+  input[type=checkbox]:checked + label:before {
      background-color: red;
      border-color: red;
      color: #fff;
-   }
-   input[type=checkbox]:checked + label.snare:before {
-        background-color: #ffdb3e;
-        border-color: #ffdb3e;
-      }
-    input[type=checkbox]:checked + label.kick:before {
-            background-color: #ff5115;
-            border-color: #ff5115;
-          }
-    input[type=checkbox]:checked + label.tone1:before {
-                background-color: #f91211;
-                border-color: #f91211;
-              }
-              input[type=checkbox]:checked + label.tone2:before {
-                              background-color: #b81645;
-                              border-color: #b81645;
-                            }
-                            input[type=checkbox]:checked + label.tone3:before {
-                                            background-color: #852755;
-                                            border-color: #852755;
-                                          }
+  }
+  input[type=checkbox]:checked + label.tone1:before {
+       background-color: #ffdb3e;
+       border-color: #ffdb3e;
+  }
+  input[type=checkbox]:checked + label.tone2:before {
+        background-color: #ff5115;
+        border-color: #ff5115;
+  }
+  input[type=checkbox]:checked + label.tone3:before {
+        background-color: #f91211;
+        border-color: #f91211;
+  }
+  input[type=checkbox]:checked + label.snare:before {
+     background-color: #b81645;
+     border-color: #b81645;
+  }
+  input[type=checkbox]:checked + label.kick:before {
+      background-color: #852755;
+      border-color: #852755;
+  }
 </style>
 
 {#if !loaded}
