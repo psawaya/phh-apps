@@ -196,6 +196,13 @@
 </script>
 
 <style>
+  .playButton {
+    background-color: white;
+    color: #852755;
+    border: solid 1px #852755;
+    border-radius: 10px;
+    padding: 10px 15px;
+  }
   input {
       margin: 0;
       width: 100px;
@@ -207,7 +214,7 @@
       margin: 12px 10px;
   }
   .active {
-      transform: scale(2.5) !important;
+      transform: scale(1.15) !important;
   }
   b {
       display: inline-block;
@@ -217,53 +224,92 @@
     width: 20px;
     display: inline-block;
   }
-  label {
+  span {
     width: 150px;
     display: inline-block;
    }
+
+
+   input[type=checkbox] + label {
+     display: inline-block;
+     margin: 4px 0;
+     cursor: pointer;
+     padding: 0;
+   }
+
+   input[type=checkbox] {
+     display: none;
+   }
+
+   input[type=checkbox] + label:before {
+     content: "";
+     background-color: #f9f0d6;
+     border: 0.1em solid #e6dcc0;
+     border-radius: 0.2em;
+     display: inline-block;
+     width: 25px;
+     height: 25px;
+     padding-left: 0.2em;
+     padding-bottom: 0.3em;
+     margin-right: 0.2em;
+     vertical-align: bottom;
+     color: transparent;
+     transition: .2s;
+   }
+
+   input[type=checkbox] + label:hover:before {
+        background-color: #e6dcc0;
+    }
+
+   input[type=checkbox] + label:active:before {
+     transform: scale(0);
+   }
+
+   input[type=checkbox]:checked + label:before {
+     background-color: red;
+     border-color: red;
+     color: #fff;
+   }
+   input[type=checkbox]:checked + label.snare:before {
+        background-color: #ffdb3e;
+        border-color: #ffdb3e;
+      }
+    input[type=checkbox]:checked + label.kick:before {
+            background-color: #ff5115;
+            border-color: #ff5115;
+          }
+    input[type=checkbox]:checked + label.tone1:before {
+                background-color: #f91211;
+                border-color: #f91211;
+              }
+              input[type=checkbox]:checked + label.tone2:before {
+                              background-color: #b81645;
+                              border-color: #b81645;
+                            }
+                            input[type=checkbox]:checked + label.tone3:before {
+                                            background-color: #852755;
+                                            border-color: #852755;
+                                          }
 </style>
 
 {#if !loaded}
   <div>Loading...</div>
 {:else}
-    <button on:click={playPause}>
+    <button on:click={playPause} class="playButton">
          &#9658;&nbsp; &#10074; &#10074;
     </button> &nbsp;{#if playing}
                Playing...
     {/if}<br>
-    <b>BPM</b>
     <input
-          type=number
+          type=range
+          min="1"
+          max="500"
           bind:value={tempo}
           on:change={setTheInt}
-    >
+    > {tempo} BPM<br><br>
     <div>
       <div>
-          <b>Snare</b>
-          {#each itemsSnare as item}
-                  <input
-                      type="checkbox"
-                      bind:group={selectedSnare}
-                      on:change={updateState}
-                      value={item}
-                      class:active="{timer==item}"
-                  />
-          {/each}
-      </div>
-      <div>
-        <b>Kick</b>
-        {#each itemsKick as item}
-                <input
-                    type="checkbox"
-                    bind:group={selectedKick}
-                    on:change={updateState}
-                    value={item}
-                    class:active="{timer==item}"
-                />
-        {/each}
-      </div>
-      <div>
-          <label>
+          <span>
             <input
                  type=range
                  min="0"
@@ -271,7 +317,7 @@
                  bind:value={octave1}
                  on:change={updateState}
             > {octave1}
-          </label>
+          </span>
         {#each itemsTone1 as item}
                 <input
                     type="checkbox"
@@ -279,11 +325,17 @@
                     on:change={updateState}
                     value={item}
                     class:active="{timer==item}"
+                    id="tone1-{item}"
+                />
+                <label
+                    for="tone1-{item}"
+                    class="tone1"
+                    class:active="{timer==item}"
                 />
         {/each}
         </div>
         <div>
-          <label>
+          <span>
             <input
                  type=range
                  min="0"
@@ -291,7 +343,7 @@
                  bind:value={octave2}
                  on:change={updateState}
            > {octave2}
-         </label>
+         </span>
         {#each itemsTone2 as item}
                 <input
                     type="checkbox"
@@ -299,11 +351,17 @@
                     on:change={updateState}
                     value={item}
                     class:active="{timer==item}"
+                    id="tone2-{item}"
+                />
+                <label
+                    for="tone2-{item}"
+                    class="tone2"
+                    class:active="{timer==item}"
                 />
         {/each}
          </div>
          <div>
-            <label>
+            <span>
               <input
                    type=range
                    min="0"
@@ -311,7 +369,7 @@
                   bind:value={octave3}
                   on:change={updateState}
               > {octave3}
-            </label>
+            </span>
         {#each itemsTone3 as item}
                 <input
                     type="checkbox"
@@ -319,9 +377,49 @@
                     on:change={updateState}
                     value={item}
                     class:active="{timer==item}"
+                    id="tone3-{item}"
+                />
+                <label
+                    for="tone3-{item}"
+                    class="tone3"
+                    class:active="{timer==item}"
                 />
         {/each}
-
         </div>
+        <div>
+                  <b>Snare</b>
+                  {#each itemsSnare as item}
+                          <input
+                              type="checkbox"
+                              bind:group={selectedSnare}
+                              on:change={updateState}
+                              value={item}
+                              id="snare-{item}"
+                          />
+                          <label
+                              for="snare-{item}"
+                              class="snare"
+                              class:active="{timer==item}"
+                          />
+                  {/each}
+              </div>
+              <div>
+                <b>Kick</b>
+                {#each itemsKick as item}
+                        <input
+                            type="checkbox"
+                            bind:group={selectedKick}
+                            on:change={updateState}
+                            value={item}
+                            class:active="{timer==item}"
+                            id="kick-{item}"
+                        />
+                        <label
+                            for="kick-{item}"
+                            class="kick"
+                            class:active="{timer==item}"
+                        />
+                {/each}
+              </div>
     </div>
 {/if}
