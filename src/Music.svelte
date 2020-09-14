@@ -1,6 +1,7 @@
 <script>
   import { AppInterface } from "./AppInterface";
   import Toggle from "./Toggle.svelte";
+  import Tone from "./Tone.js";
 
   import _ from "lodash";
   import App from "./App.svelte";
@@ -8,49 +9,80 @@
   const appInterface = new AppInterface();
 
   let playing = false;
-
   let loaded = false;
 
-  let players = [];
-  let localPlayer = null;
-  let timer = 0;
-  let tempo = 150;
+  let timer = 1;
+  let tempo = 240;
 
-  	let selectedSnare = [];
-      let selectedBass = [];
-      let selectedHat = [];
+  const synth1 = new Tone.Synth();
+  synth1.oscillator.type = "pwm";
+  synth1.toMaster();
 
-  	let items = [
-  		'1',
-  		'2',
-  		'3',
-  		'4',
-  		'5',
-        '6',
-        '7',
-        '8'
-  	];
-  	let itemsBass = [
-  		'1',
-  		'2',
-  		'3',
-  		'4',
-  		'5',
-        '6',
-        '7',
-        '8'
-      ];
-      let itemsHat = [
-  		'1',
-  		'2',
-  		'3',
-  		'4',
-  		'5',
-        '6',
-        '7',
-        '8'
-      ];
+  const synth2 = new Tone.Synth();
+  synth2.oscillator.type = "pwm";
+  synth2.toMaster();
 
+  const synth3 = new Tone.Synth();
+  synth3.oscillator.type = "pwm";
+  synth3.toMaster();
+
+  const kickDrum = new Tone.MembraneSynth();
+  kickDrum.toMaster();
+
+  const lowPass = new Tone.Filter({
+    frequency: 8000,
+  }).toMaster();
+
+  const snareDrum = new Tone.NoiseSynth({
+    volume: 1,
+    noise: {
+      type: 'white',
+      playbackRate: 3,
+    },
+    envelope: {
+      attack: 0.001,
+      decay: 0.20,
+      sustain: 0.15,
+      release: 0.03,
+    },
+  }).connect(lowPass);
+
+  let selectedSnare = [];
+  let selectedKick = [];
+  let selectedTone1 = [];
+  let selectedTone2 = [];
+  let selectedTone3 = [];
+
+  let octave1 = 3;
+  let octave2 = 3;
+  let octave3 = 3;
+
+  let steps = 16;
+  let itemsMaster = [
+    '1',
+    '2',
+    '3',
+    '4',
+    '5',
+    '6',
+    '7',
+    '8',
+    '9',
+    '10',
+    '11',
+    '12',
+    '13',
+    '14',
+    '15',
+    '16'
+  ];
+
+  let itemsKick = itemsMaster;
+  let itemsSnare = itemsMaster;
+
+  let itemsTone1 = itemsMaster;
+  let itemsTone2 = itemsMaster;
+  let itemsTone3 = itemsMaster;
 
 
   function updatePlaying(state) {
@@ -58,201 +90,238 @@
     if (state.timer) {
       timer = state.timer;
       }
-      if (state.selectedSnare) {
+    if (state.selectedSnare) {
         selectedSnare = state.selectedSnare;
-      }
-      if (state.selectedBass) {
-    selectedBass = state.selectedBass;
     }
-    if (state.selectedHat) {
-      selectedHat = state.selectedHat;
-     }
-      if (state.tempo) {
-        tempo = state.tempo;
+    if (state.selectedKick) {
+        selectedKick = state.selectedKick;
     }
-
-}
+    if (state.selectedTone1) {
+        selectedTone1 = state.selectedTone1;
+    }
+    if (state.selectedTone2) {
+        selectedTone2 = state.selectedTone2;
+    }
+    if (state.selectedTone3) {
+        selectedTone3 = state.selectedTone3;
+    }
+    if (state.octave1) {
+          octave1 = state.octave1;
+    }
+    if (state.octave2) {
+          octave2 = state.octave2;
+    }
+    if (state.octave3) {
+          octave3 = state.octave3;
+    }
+    if (state.tempo) {
+      tempo = state.tempo;
+    }
+  }
   appInterface.onChange(updatePlaying);
   appInterface.onLoad((state) => {
     updatePlaying(state);
     appInterface.setFrameHeight(300);
-    loadPlayers();
     loaded = true;
   });
 
-  async function loadPlayers() {
-    players = await appInterface.getPlayers();
-    localPlayer = players.find((player) => player.localPlayer == true);
+  function playPause() {
+      if (playing) {
+          clearInt();
+      }
+      else {
+          setTheInt();
+      }
+      playing = !playing;
+      appInterface.update("playing", playing);
+      timer = 0;
+      appInterface.update("timer", timer);
   }
 
+  function updateState() {
+      appInterface.update("selectedSnare", selectedSnare);
+      appInterface.update("selectedKick", selectedKick);
+      appInterface.update("selectedTone1", selectedTone1);
+      appInterface.update("selectedTone2", selectedTone2);
+      appInterface.update("selectedTone3", selectedTone3);
+      appInterface.update("octave1", octave1);
+      appInterface.update("octave2", octave2);
+      appInterface.update("octave3", octave3);
+      appInterface.update("tempo", tempo);
+  }
 
-// document.documentElement.addEventListener('mousedown', () => {
-//   if (Tone.context.state !== 'running') Tone.context.resume();
-// });
+  function player() {
+      if (playing == true) {
+          var pos = "" + timer;
+          if (selectedSnare.includes(pos)) {
+               snareDrum.triggerAttackRelease('32n');
+          }
+          if (selectedKick.includes(pos)) {
+               kickDrum.triggerAttackRelease("C1", "8n");
+          }
+          if (selectedTone1.includes(pos)) {
+               synth1.triggerAttackRelease("C" + octave1, "16n");
+          }
+          if (selectedTone2.includes(pos)) {
+               synth2.triggerAttackRelease("E" + octave2, "16n");
+          }
+          if (selectedTone3.includes(pos)) {
+               synth3.triggerAttackRelease("G" + octave3, "16n");
+          }
+          timer++;
+          if (timer > steps ) {
+              timer = 1;
+          }
+      }
+  }
 
-var bass = new Audio("https://freewavesamples.com/files/Bass-Drum-1.wav");
-var snare = new Audio("https://freewavesamples.com/files/Ensoniq-ESQ-1-Snare.wav");
-var kick = new Audio("https://freewavesamples.com/files/Floor-Tom-1.wav");
-var hat = new Audio("https://freewavesamples.com/files/Closed-Hi-Hat-1.wav");
+  function clearInt() {
+      clearInterval(setInt);
+  }
 
+  var setInt;
 
+  function setTheInt() {
+       clearInterval(setInt);
+       setInt = setInterval(function(){
+           player();
+       }, (60/tempo*1000));
+       appInterface.update("tempo", tempo);
+  }
 
-function playPause() {
-    if (playing) {
-        clearInt();
-    }
-    else {
-        setTheInt();
-    }
-    playing = !playing;
-    console.log(playing);
-    appInterface.update("playing", playing);
-    timer = 0;
-    appInterface.update("timer", timer);
-}
-
-
-function updateState() {
-    appInterface.update("selectedSnare", selectedSnare);
-    appInterface.update("selectedBass", selectedBass);
-    appInterface.update("selectedHat", selectedHat);
-    appInterface.update("tempo", tempo);
-    console.log("updating state!!!!!!!!");
-
-}
-
-function player() {
- if (playing == true) {
-            var pos = "" + timer;
-            console.log(pos);
-            if (selectedSnare.includes(pos)) {
-                    snare.pause();
-                    snare.currentTime = 0;
-                    snare.play();
-                    console.log("snare");
-            }
-            if (selectedHat.includes(pos)) {
-                    hat.pause();
-                    hat.currentTime = 0;
-                    hat.play();
-                    console.log("hat");
-            }
-            if (selectedBass.includes(pos)) {
-                            bass.pause();
-                            bass.currentTime = 0;
-                            bass.play();
-                            console.log("bass");
-                    }
-            timer++;
-            if (timer > 8 ) {
-                timer = 1;
-            }
-            console.log("TIMERRRRRR", timer);
-        }
-        console.log("player", tempo);
-}
-
-function clearInt() {
-    clearInterval(setInt);
-}
-
-var setInt;
-
-
-function setTheInt() {
-     clearInterval(setInt);
-     setInt = setInterval(function(){
-         player();
-         console.log("setInt", tempo);
-     }, (60/tempo*1000));
-     appInterface.update("tempo", tempo);
-}
-
-function clearChecks() {
-    selectedSnare = [];
-    selectedBass = [];
-    selectedHat = [];
-}
+  function clearChecks() {
+      selectedSnare = [];
+      selectedKick = [];
+  }
 </script>
 
 <style>
-    input {
-            margin: 20px 10px;
-    }
-    input[type="checkbox"] {
-        transform: scale(2);
-        display: inline-block;
-        width: 30px;
-
-    }
-    .active {
-        transform: scale(2.5) !important;
-    }
-    b {
-        display: inline-block;
-        width: 60px;
-    }
+  input {
+      margin: 0;
+      width: 100px;
+  }
+  input[type="checkbox"] {
+      transform: scale(2);
+      display: inline-block;
+      width: 20px;
+      margin: 12px 10px;
+  }
+  .active {
+      transform: scale(2.5) !important;
+  }
+  b {
+      display: inline-block;
+      width: 150px;
+  }
+  p {
+    width: 20px;
+    display: inline-block;
+  }
+  label {
+    width: 150px;
+    display: inline-block;
+   }
 </style>
 
 {#if !loaded}
   <div>Loading...</div>
 {:else}
-<button on:click={playPause}>
-        &#9658;&nbsp; &#10074; &#10074;
-  </button> &nbsp;{#if playing}
+    <button on:click={playPause}>
+         &#9658;&nbsp; &#10074; &#10074;
+    </button> &nbsp;{#if playing}
                Playing...
-             {/if}<br>
-          <b>BPM</b>
-          <input
-              type=number
-              bind:value={tempo}
-              on:change={setTheInt}
-          >
+    {/if}<br>
+    <b>BPM</b>
+    <input
+          type=number
+          bind:value={tempo}
+          on:change={setTheInt}
+    >
     <div>
-
-        <b>Snare</b>
-        {#each items as item}
+      <div>
+          <b>Snare</b>
+          {#each itemsSnare as item}
+                  <input
+                      type="checkbox"
+                      bind:group={selectedSnare}
+                      on:change={updateState}
+                      value={item}
+                      class:active="{timer==item}"
+                  />
+          {/each}
+      </div>
+      <div>
+        <b>Kick</b>
+        {#each itemsKick as item}
                 <input
                     type="checkbox"
-                    bind:group={selectedSnare}
+                    bind:group={selectedKick}
                     on:change={updateState}
                     value={item}
                     class:active="{timer==item}"
                 />
-        {/each}<br>
-        <b>Bass</b>
-        {#each itemsBass as item}
-        		<input
-        			type="checkbox"
-        			bind:group={selectedBass}
-        			on:change={updateState}
-        			value={item}
-                    class:active="{timer==item}"
-        		/>
-        {/each}<br>
-        <b>Hi Hat</b>
-        {#each itemsHat as item}
+        {/each}
+      </div>
+      <div>
+          <label>
+            <input
+                 type=range
+                 min="0"
+                 max="10"
+                 bind:value={octave1}
+                 on:change={updateState}
+            > {octave1}
+          </label>
+        {#each itemsTone1 as item}
                 <input
                     type="checkbox"
-                    bind:group={selectedHat}
+                    bind:group={selectedTone1}
                     on:change={updateState}
                     value={item}
                     class:active="{timer==item}"
                 />
-        {/each}<br>
+        {/each}
+        </div>
+        <div>
+          <label>
+            <input
+                 type=range
+                 min="0"
+                 max="10"
+                 bind:value={octave2}
+                 on:change={updateState}
+           > {octave2}
+         </label>
+        {#each itemsTone2 as item}
+                <input
+                    type="checkbox"
+                    bind:group={selectedTone2}
+                    on:change={updateState}
+                    value={item}
+                    class:active="{timer==item}"
+                />
+        {/each}
+         </div>
+         <div>
+            <label>
+              <input
+                   type=range
+                   min="0"
+                   max="10"
+                  bind:value={octave3}
+                  on:change={updateState}
+              > {octave3}
+            </label>
+        {#each itemsTone3 as item}
+                <input
+                    type="checkbox"
+                    bind:group={selectedTone3}
+                    on:change={updateState}
+                    value={item}
+                    class:active="{timer==item}"
+                />
+        {/each}
 
-
+        </div>
     </div>
-    <!--
-            debug
-          <button on:click={clearInt}>
-                  <b>Clear Int </b>
-            </button>
-              <button on:click={setTheInt}>
-                      <b>Set Int</b>
-                </button>
-                <button on:click={clearChecks}>
-                              <b>Clear</b>
-                        </button>
-     -->
 {/if}
