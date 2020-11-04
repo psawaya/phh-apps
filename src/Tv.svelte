@@ -12,7 +12,7 @@
     playing: false,
   };
   let player = null;
-  let videoIdInput = "RYlCVwxoL_g";
+  let videoIdInput = "yRgI6-LJVKc";
 
   function onVideoStateChange({ detail }) {
     if (state.playing) {
