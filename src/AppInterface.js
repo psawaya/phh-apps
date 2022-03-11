@@ -3,7 +3,7 @@ import { createSignal } from "strong-events";
 
 export class AppInterface {
   static DEV_DESTINATION_URL = "http://localhost:3000";
-  static PROD_DESTINATION_URL = "https://elsewhere.zone";
+  static PROD_DESTINATION_URL = "https://pixel-happy-hour.herokuapp.com";
 
   constructor() {
     let urlParams = new URLSearchParams(window.location.search);
