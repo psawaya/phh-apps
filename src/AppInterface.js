@@ -3,7 +3,7 @@ import { createSignal } from "strong-events";
 
 export class AppInterface {
   static DEV_DESTINATION_URL = "http://localhost:3000";
-  static PROD_DESTINATION_URL = "https://elsewhere.zone";
+  static PROD_DESTINATION_URL = "https://go.elsewhere.zone";
 
   constructor() {
     let urlParams = new URLSearchParams(window.location.search);
@@ -12,6 +12,9 @@ export class AppInterface {
       this.appId = urlParams.get("appId");
     } else {
       throw new Error("appId param missing!");
+    }
+    if (urlParams.get("appHost")) {
+      this.appHost = urlParams.get("appHost");
     }
     this.onChange = createSignal();
     this.onLoad = createSignal();
@@ -23,6 +26,9 @@ export class AppInterface {
     return window.location.hostname === "localhost";
   }
   getDestinationURL() {
+    if (this.appHost) {
+      return this.appHost;
+    }
     return this.isDev()
       ? AppInterface.DEV_DESTINATION_URL
       : AppInterface.PROD_DESTINATION_URL;
