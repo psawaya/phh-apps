@@ -16,6 +16,9 @@ export class AppInterface {
     if (urlParams.get("appHost")) {
       this.appHost = urlParams.get("appHost");
     }
+    if (urlParams.get("debug")) {
+      this.debug = true;
+    }
     this.onChange = createSignal();
     this.onLoad = createSignal();
     this.onGetPlayersPromises = [];
@@ -49,7 +52,9 @@ export class AppInterface {
     if (message.origin !== this.getDestinationURL()) {
       return;
     }
-    console.log(`_onMessage`, message.data);
+    if (this.debug) {
+      console.log(`_onMessage`, message.data);
+    }
     if (message.data.type === "change") {
       this.onChange.invoke(message.data.data, message.data.changes);
     } else if (message.data.type === "load") {
