@@ -1,6 +1,5 @@
 <script>
   import { AppInterface } from "./AppInterface";
-  import App from "./App.svelte";
 
   const appInterface = new AppInterface();
   let loaded = false;

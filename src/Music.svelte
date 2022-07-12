@@ -4,7 +4,6 @@
   import Tone from "./Tone.js";
 
   import _ from "lodash";
-  import App from "./App.svelte";
 
   const appInterface = new AppInterface();
 

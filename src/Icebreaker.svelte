@@ -3,7 +3,6 @@
   // Shamelessly lifted from https://museumhack.com/list-icebreakers-questions/
   import { ICEBREAKER_QUESTIONS } from "./IcebreakerQuestions";
   import _ from "lodash";
-  import App from "./App.svelte";
 
   const appInterface = new AppInterface();
 
