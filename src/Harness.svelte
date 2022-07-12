@@ -80,6 +80,7 @@
   };
   const appPlayerLeave = (id) => {
     allPlayers = allPlayers.filter((player) => player.id !== id);
+    // TODO: What message is sent to notify others?
   };
   const appPostMessage = (id, data) => {
     const iFrame = document.getElementById(`app${id}`);
