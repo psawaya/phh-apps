@@ -169,6 +169,7 @@ h3 {
   <button on:click={reset}>Reset</button>
 </div>
 <div>
+  <textarea readonly style="width: 100%" rows="10">{JSON.stringify(appData)}</textarea>
   {#each allPlayers as player}
     <div class="frame">
       <h3>{player.name} <button on:click={appPlayerLeave.bind(this, player.id)}>Leave</button></h3>
