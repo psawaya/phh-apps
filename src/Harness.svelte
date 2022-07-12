@@ -25,10 +25,10 @@
       console.log(`appHost: ${appHost}`);
       addUrlParam('appHost', appHost, false);
     }
-    if (!parsed.searchParams.get('debug')) {
-      console.log('debug enabled');
-      addUrlParam('debug', 'true');
-    }
+    // if (!parsed.searchParams.get('debug')) {
+    //   console.log('debug enabled');
+    //   addUrlParam('debug', 'true');
+    // }
 
     appData = {};
     window.addEventListener('message', appListener);
@@ -44,7 +44,10 @@
   };
 
   const refreshAllFrames = () => {
-    console.log('refreshAllFrames', allPlayers);
+    for (const player of allPlayers) {
+      const frame = document.getElementById(`app${player.id}`);
+      frame.src = frame.src;
+    }
   };
 
   const reset = () => {
@@ -76,7 +79,7 @@
     });
   };
   const appPlayerLeave = (id) => {
-    // TODO: Send a message and remove the player
+    allPlayers = allPlayers.filter((player) => player.id !== id);
   };
   const appPostMessage = (id, data) => {
     const iFrame = document.getElementById(`app${id}`);
