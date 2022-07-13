@@ -222,7 +222,7 @@
     loaded = true;
   });
   appInterface.onPlayerJoined((player) => {
-    console.log(`Welcome ${player.name} (from ${localPlayer?.name || 'Unknown'})!`);
+    // console.log(`Welcome ${player.name} (from ${localPlayer?.name || 'Unknown'})!`);
     // Add them to the players and gamePlayers list
     // TODO: Consider active vs non-active rounds
     // players.push(player);
@@ -236,7 +236,7 @@
     // appInterface.update('gamePlayers', gamePlayers);
   });
   appInterface.onPlayerLeft((player) => {
-    console.log(`Bye ${player.name} (from ${localPlayer?.name || 'Unknown'})!`);
+    // console.log(`Bye ${player.name} (from ${localPlayer?.name || 'Unknown'})!`);
     // players = players.filter((p) => p.id !== player.id);
     // gamePlayers = gamePlayers.filter((g) => g.id !== player.id);
     // appInterface.update('gamePlayers', gamePlayers);
