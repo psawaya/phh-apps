@@ -21,6 +21,8 @@ export class AppInterface {
     }
     this.onChange = createSignal();
     this.onLoad = createSignal();
+    this.onPlayerJoined = createSignal();
+    this.onPlayerLeft = createSignal();
     this.onGetPlayersPromises = [];
     this.receivedInitialState = false;
     window.addEventListener("message", this._onMessage.bind(this));
@@ -55,19 +57,29 @@ export class AppInterface {
     if (this.debug) {
       console.log(`_onMessage`, message.data);
     }
-    if (message.data.type === "change") {
-      this.onChange.invoke(message.data.data, message.data.changes);
-    } else if (message.data.type === "load") {
-      this.receivedInitialState = true;
-      // this.automergeDoc = Automerge.from(
-      //   JSON.parse(message.data.automergeData)
-      // );
-      this.onLoad.invoke(message.data.data);
-    } else if (message.data.type === "get_players") {
-      this.onGetPlayersPromises.forEach((promiseObj) => {
-        promiseObj.resolve(message.data.data);
-        this.onGetPlayersPromises = [];
-      });
+    switch (message.data.type) {
+      case 'change':
+        this.onChange.invoke(message.data.data, message.data.changes);
+        break;
+      case 'load':
+        this.receivedInitialState = true;
+        // this.automergeDoc = Automerge.from(
+        //   JSON.parse(message.data.automergeData)
+        // );
+        this.onLoad.invoke(message.data.data);
+        break;
+      case 'get_players':
+        this.onGetPlayersPromises.forEach((promiseObj) => {
+          promiseObj.resolve(message.data.data);
+          this.onGetPlayersPromises = [];
+        });
+        break;
+      case 'player_joined':
+        this.onPlayerJoined.invoke(message.data.data);
+        break;
+      case 'player_left':
+        this.onPlayerLeft.invoke(message.data.data);
+        break;
     }
   }
   postMessage(data) {

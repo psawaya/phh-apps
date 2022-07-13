@@ -13,8 +13,8 @@
   let gameState = "off";
   let dealer = { points: 0, hand: [] };
 
-  var suits = ["S", "H", "D", "C"];
-  var values = [
+  const suits = ["S", "H", "D", "C"];
+  const values = [
     "2",
     "3",
     "4",
@@ -29,26 +29,29 @@
     "K",
     "A",
   ];
-  var deck = new Array();
+  let deck = [];
 
   function createDeck() {
-    deck = new Array();
-    for (var i = 0; i < values.length; i++) {
-      for (var x = 0; x < suits.length; x++) {
-        var weight = parseInt(values[i]);
-        if (values[i] == "J" || values[i] == "Q" || values[i] == "K")
+    deck = [];
+    for (let i = 0; i < values.length; i++) {
+      for (let x = 0; x < suits.length; x++) {
+        let weight = parseInt(values[i], 10);
+        if (values[i] === 'J' || values[i] === 'Q' || values[i] === 'K') {
           weight = 10;
-        if (values[i] == "A") weight = 11;
-        var card = { value: values[i], suit: suits[x], weight: weight };
+        }
+        if (values[i] === 'A') {
+          weight = 11;
+        }
+        const card = { value: values[i], suit: suits[x], weight: weight };
         deck.push(card);
       }
     }
   }
   function shuffle() {
-    for (var i = 0; i < 1000; i++) {
-      var location1 = Math.floor(Math.random() * deck.length);
-      var location2 = Math.floor(Math.random() * deck.length);
-      var tmp = deck[location1];
+    for (let i = 0; i < 1000; i++) {
+      const location1 = Math.floor(Math.random() * deck.length);
+      const location2 = Math.floor(Math.random() * deck.length);
+      const tmp = deck[location1];
 
       deck[location1] = deck[location2];
       deck[location2] = tmp;
@@ -56,13 +59,12 @@
     appInterface.update("deck", deck);
   }
   function createPlayers() {
-    for (var i = 0; i < filtered.length; i++) {
-      var hand = new Array();
-      var player = {
+    for (let i = 0; i < filtered.length; i++) {
+      const player = {
         name: filtered[i].name,
         id: filtered[i].id,
         points: 0,
-        hand: hand,
+        hand: [],
         result: null,
       };
       gamePlayers.push(player);
@@ -217,17 +219,36 @@
   appInterface.onChange(updateGame);
   appInterface.onLoad((state) => {
     updateGame(state);
-    loadPlayers();
     loaded = true;
+  });
+  appInterface.onPlayerJoined((player) => {
+    console.log(`Welcome ${player.name} (from ${localPlayer?.name || 'Unknown'})!`);
+    // Add them to the players and gamePlayers list
+    // TODO: Consider active vs non-active rounds
+    // players.push(player);
+    // gamePlayers.push({
+    //   name: player.name,
+    //   id: player.id,
+    //   points: 0,
+    //   hand: [],
+    //   result: null,
+    // });
+    // appInterface.update('gamePlayers', gamePlayers);
+  });
+  appInterface.onPlayerLeft((player) => {
+    console.log(`Bye ${player.name} (from ${localPlayer?.name || 'Unknown'})!`);
+    // players = players.filter((p) => p.id !== player.id);
+    // gamePlayers = gamePlayers.filter((g) => g.id !== player.id);
+    // appInterface.update('gamePlayers', gamePlayers);
+    // if (currentPlayer >= gamePlayers.length) {
+    //   checkDealer();
+    // }
   });
   async function loadPlayers() {
     players = await appInterface.getPlayers();
-    var filteredList = players;
-    filtered = filteredList.filter(function (x) {
-      return x !== undefined;
-    });
+    filtered = players.filter((x) => !!x);
     arePlayersLoaded = true;
-    localPlayer = filtered.find((player) => player.localPlayer == true);
+    localPlayer = filtered.find((player) => player.localPlayer);
   }
 </script>
 
@@ -274,7 +295,7 @@
     margin-top: 5px;
   }
   .controls button {
-    background-color: whitemoke;
+    background-color: whitesmoke;
     border: none;
     font-weight: 600;
     margin-bottom: 0;

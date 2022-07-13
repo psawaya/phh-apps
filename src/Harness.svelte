@@ -4,7 +4,7 @@
 
   let loaded = false;
   let allPlayers = [];
-  let originalUrl = 'https://apps.elsewhere.zone/?appName=blackjack';
+  let originalUrl = window.location.hostname === 'localhost' ? 'http://localhost:5001/?appName=blackjack' : 'https://apps.elsewhere.zone/?appName=blackjack';
   let appUrl = '';
   let appId = '123';
   let appData = {};
@@ -36,13 +36,6 @@
     loaded = true;
   };
 
-  const simulatePlayerJoin = () => {
-    const player = { id: new Date().getTime(), name: _.sample(PLAYER_NAMES) };
-
-    // Let Svelte know this has been updated
-    allPlayers = [...allPlayers, player];
-  };
-
   const refreshAllFrames = () => {
     for (const player of allPlayers) {
       const frame = document.getElementById(`app${player.id}`);
@@ -71,6 +64,14 @@
       appUrl += `${key}=${value}`;
     }
   };
+  const mapPlayer = (player, localPlayer) => {
+    return {
+      id: player.id,
+      sessionId: player.id,
+      name: player.name,
+      localPlayer,
+    };
+  };
 
   const appStart = (id) => {
     appPostMessage(id, {
@@ -78,22 +79,45 @@
       data: appData,
     });
   };
+  const appPlayerJoin = () => {
+    const newPlayer = { id: new Date().getTime(), name: _.sample(PLAYER_NAMES) };
+
+    const data = mapPlayer(newPlayer, false);
+    for (const player of allPlayers) {
+      appPostMessage(player.id, { type: 'player_joined', data });
+    }
+
+    // Let Svelte know this has been updated
+    allPlayers = [...allPlayers, newPlayer];
+  };
   const appPlayerLeave = (id) => {
-    allPlayers = allPlayers.filter((player) => player.id !== id);
-    // TODO: What message is sent to notify others?
+    const removed = _.find(allPlayers, { id });
+    if (!removed) {
+      console.log('Player left not found', id);
+      return;
+    }
+    allPlayers = _.reject(allPlayers, { id });
+    const data = mapPlayer(removed, false);
+    for (const player of allPlayers) {
+      console.log(`Notifying ${player.name} that ${removed.name} left`);
+      appPostMessage(player.id, { type: 'player_left', data });
+    }
   };
   const appPostMessage = (id, data) => {
     const iFrame = document.getElementById(`app${id}`);
     if (iFrame) {
-      console.log('posting data to url', baseDomain);
       iFrame.contentWindow.postMessage(data, baseDomain);
+    } else {
+      console.log(`app${id} was not found`);
     }
   };
   const appListener = (msg) => {
     if (msg.origin !== baseDomain) {
       return;
     }
-    // TODO: Consider case of msg.data is not valid JSON
+    if (typeof msg.data !== 'string') {
+      return;
+    }
     const msgData = JSON.parse(msg.data);
     // Ignore message intended for other appId
     if (msgData.appId !== appId.toString()) {
@@ -112,19 +136,13 @@
           appData[key] = value;
           // Also, post a change event to each of the players
           for (const player of allPlayers) {
+            // console.log(`Notifying ${player.name} of change to ${key}`);
             appPostMessage(player.id, { type: 'change', data: appData });
           }
         }
         break;
       case 'get_players':
-        const playersData = allPlayers.map((player) => {
-          return {
-            id: player.id,
-            sessionId: player.id,
-            name: player.name,
-            localPlayer: localPlayerId === player.id,
-          };
-        });
+        const playersData = allPlayers.map((player) => mapPlayer(player, localPlayerId === player.id));
         appPostMessage(localPlayerId, {
           type: 'get_players',
           data: playersData,
@@ -164,17 +182,16 @@ h3 {
 {/if}
 {#if loaded}
 <div class="row">
-  <button on:click={simulatePlayerJoin}>Simulate Player Joining</button>
+  <button on:click={appPlayerJoin}>Simulate Player Joining</button>
   <button on:click={refreshAllFrames}>Refresh all Frames</button>
   <button on:click={reset}>Reset</button>
 </div>
 <div>
-  <textarea readonly style="width: 100%" rows="10">{JSON.stringify(appData)}</textarea>
+  <textarea readonly style="width: 100%" rows="10">{JSON.stringify(appData, null, 2)}</textarea>
   {#each allPlayers as player}
     <div class="frame">
       <h3>{player.name} <button on:click={appPlayerLeave.bind(this, player.id)}>Leave</button></h3>
-      <iframe src="{appUrl}" style="width: 100%;" on:load={appStart.bind(this, player.id)} id="app{player.id}">
-
+      <iframe src="{appUrl}" style="width: 100%;" on:load={appStart.bind(this, player.id)} id="app{player.id}" title="{player.name}">
       </iframe>
     </div>
   {/each}
