@@ -1,122 +1,130 @@
 <script>
-  import { AppInterface } from "./AppInterface";
+  import { AppInterface } from './AppInterface';
 
   const appInterface = new AppInterface();
   let loaded = false;
   let arePlayersLoaded = false;
 
   let players = [];
-  let filtered = [];
   let gamePlayers = [];
   let localPlayer = null;
   let currentPlayer = 0;
-  let gameState = "off";
+  let gameState = 'off';
+
   let dealer = { points: 0, hand: [] };
 
-  const suits = ["S", "H", "D", "C"];
-  const values = [
-    "2",
-    "3",
-    "4",
-    "5",
-    "6",
-    "7",
-    "8",
-    "9",
-    "10",
-    "J",
-    "Q",
-    "K",
-    "A",
+  const CARD_SUITS = ['S', 'H', 'D', 'C'];
+  const CARD_VALUES = [
+    '2',
+    '3',
+    '4',
+    '5',
+    '6',
+    '7',
+    '8',
+    '9',
+    '10',
+    'J',
+    'Q',
+    'K',
+    'A',
   ];
   let deck = [];
 
-  function createDeck() {
+  const createDeck = () => {
     deck = [];
-    for (let i = 0; i < values.length; i++) {
-      for (let x = 0; x < suits.length; x++) {
-        let weight = parseInt(values[i], 10);
-        if (values[i] === 'J' || values[i] === 'Q' || values[i] === 'K') {
-          weight = 10;
+    for (const value of CARD_VALUES) {
+      for (const suit of CARD_SUITS) {
+        let weight;
+        switch (value) {
+          case 'J':
+          case 'Q':
+          case 'K':
+            weight = 10;
+            break;
+          case 'A':
+            weight = 11;
+            break;
+          default:
+            weight = parseInt(value, 10);
+            break;
         }
-        if (values[i] === 'A') {
-          weight = 11;
-        }
-        const card = { value: values[i], suit: suits[x], weight: weight };
+        const card = { value, suit, weight };
         deck.push(card);
       }
     }
-  }
-  function shuffle() {
+  };
+  const shuffle = () => {
     for (let i = 0; i < 1000; i++) {
       const location1 = Math.floor(Math.random() * deck.length);
       const location2 = Math.floor(Math.random() * deck.length);
       const tmp = deck[location1];
-
       deck[location1] = deck[location2];
       deck[location2] = tmp;
     }
-    appInterface.update("deck", deck);
-  }
-  function createPlayers() {
-    for (let i = 0; i < filtered.length; i++) {
+    appInterface.update('deck', deck);
+  };
+  const createPlayers = () => {
+    for (let i = 0; i < players.length; i++) {
       const player = {
-        name: filtered[i].name,
-        id: filtered[i].id,
+        name: players[i].name,
+        id: players[i].id,
+        sessionId: players[i].sessionId,
         points: 0,
         hand: [],
+        state: 'playing',
         result: null,
       };
       gamePlayers.push(player);
     }
-  }
-  function dealHands() {
-    for (var i = 0; i < 2; i++) {
-      for (var x = 0; x < gamePlayers.length; x++) {
-        var card = deck.pop();
+  };
+  const dealHands = () => {
+    for (let i = 0; i < 2; i++) {
+      for (let x = 0; x < gamePlayers.length; x++) {
+        const card = deck.pop();
         gamePlayers[x].hand.push(card);
       }
     }
-    for (var i = 0; i < 2; i++) {
-      var card = deck.pop();
+    for (let i = 0; i < 2; i++) {
+      const card = deck.pop();
       dealer.hand.push(card);
     }
-    appInterface.update("deck", deck);
-  }
-  function hitMe() {
-    var card = deck.pop();
+    appInterface.update('deck', deck);
+  };
+  const hitMe = () => {
+    const card = deck.pop();
     gamePlayers[currentPlayer].hand.push(card);
-    appInterface.update("gamePlayers", gamePlayers);
-    appInterface.update("deck", deck);
+    appInterface.update('gamePlayers', gamePlayers);
+    appInterface.update('deck', deck);
     updatePoints();
-  }
-  function hitDealer() {
-    var card = deck.pop();
+  };
+  const hitDealer = () => {
+    const card = deck.pop();
     dealer.hand.push(card);
     checkDealer();
-    appInterface.update("deck", deck);
-  }
-  function stay() {
+    appInterface.update('deck', deck);
+  };
+  const stay = () => {
     nextPlayer();
-  }
-  function updatePoints() {
-    var playerScore = 0;
-    var hasAce = false;
-    for (var x = 0; x < gamePlayers[currentPlayer].hand.length; x++) {
+  };
+  const updatePoints = () => {
+    let playerScore = 0;
+    let hasAce = false;
+    for (let x = 0; x < gamePlayers[currentPlayer].hand.length; x++) {
       playerScore = playerScore + gamePlayers[currentPlayer].hand[x].weight;
-      if (gamePlayers[currentPlayer].hand[x].weight == 11) {
+      if (gamePlayers[currentPlayer].hand[x].weight * 1 === 11) {
         hasAce = true;
       }
     }
     gamePlayers[currentPlayer].points = playerScore;
-    appInterface.update("gamePlayers", gamePlayers);
+    appInterface.update('gamePlayers', gamePlayers);
     if (playerScore > 20) {
-      if (hasAce == true && playerScore == 21) {
+      if (hasAce && playerScore === 21) {
         nextPlayer();
-      } else if (hasAce == true && playerScore > 21) {
+      } else if (hasAce && playerScore > 21) {
         playerScore -= 10;
         gamePlayers[currentPlayer].points = playerScore;
-        appInterface.update("gamePlayers", gamePlayers);
+        appInterface.update('gamePlayers', gamePlayers);
         if (playerScore > 20) {
           nextPlayer();
         }
@@ -124,80 +132,87 @@
         nextPlayer();
       }
     }
-  }
-  function nextPlayer() {
+  };
+  const nextPlayer = () => {
     if (currentPlayer < gamePlayers.length - 1) {
       currentPlayer++;
       updatePoints();
-      appInterface.update("currentPlayer", currentPlayer);
+      if (gamePlayers[currentPlayer].state !== 'playing') {
+        nextPlayer();
+      } else {
+        appInterface.update('currentPlayer', currentPlayer);
+      }
     } else {
       checkDealer();
     }
-  }
-  function checkDealer() {
-    var dealerScore = 0;
-    var dealerAce = false;
-    for (var x = 0; x < dealer.hand.length; x++) {
+  };
+  const checkDealer = () => {
+    let dealerScore = 0;
+    let dealerAce = false;
+    for (let x = 0; x < dealer.hand.length; x++) {
       dealerScore = dealerScore + dealer.hand[x].weight;
-      if (dealer.hand[x].weight == 11) {
+      if (dealer.hand[x].weight * 1 === 11) {
         dealerAce = true;
       }
     }
-    if ((dealerAce = true && dealerScore > 21)) {
+    if (dealerAce && dealerScore > 21) {
       dealerScore -= 10;
     }
     dealer.points = dealerScore;
-    appInterface.update("dealer", dealer);
+    appInterface.update('dealer', dealer);
     if (dealerScore < 17) {
       hitDealer();
     } else {
       compareHands();
     }
-  }
-  function compareHands() {
-    for (var x = 0; x < gamePlayers.length; x++) {
-      var playerPoints = gamePlayers[x].points;
-      var dealerPoints = dealer.points;
+  };
+  const compareHands = () => {
+    for (let x = 0; x < gamePlayers.length; x++) {
+      let playerPoints = gamePlayers[x].points * 1;
+      let dealerPoints = dealer.points;
       if (playerPoints > 21) {
-        gamePlayers[x].result = "lose";
+        gamePlayers[x].result = 'lose';
       } else if (dealerPoints > 21) {
-        gamePlayers[x].result = "win";
-      } else if (dealerPoints == 21) {
-        if (playerPoints == 21) {
-          gamePlayers[x].result = "tie";
+        gamePlayers[x].result = 'win';
+      } else if (dealerPoints === 21) {
+        if (playerPoints === 21) {
+          gamePlayers[x].result = 'tie';
         } else {
-          gamePlayers[x].result = "lose";
+          gamePlayers[x].result = 'lose';
         }
       } else if (dealer.points < playerPoints) {
-        gamePlayers[x].result = "win";
+        gamePlayers[x].result = 'win';
       } else {
-        gamePlayers[x].result = "lose";
+        gamePlayers[x].result = 'lose';
       }
     }
-    appInterface.update("gamePlayers", gamePlayers);
-    gameState = "off";
-    appInterface.update("gameState", "off");
-  }
-  function restartGame() {
+    appInterface.update('gamePlayers', gamePlayers);
+    gameState = 'off';
+    appInterface.update('gameState', gameState);
+  };
+  const restartGame = () => {
     gamePlayers = [];
     deck = [];
     dealer = { points: 0, hand: [] };
-    appInterface.update("gamePlayers", []);
-    appInterface.update("deck", []);
-    appInterface.update("dealer", { points: 0, hand: [] });
     currentPlayer = 0;
-    appInterface.update("currentPlayer", currentPlayer);
+
+    appInterface.update('gamePlayers', gamePlayers);
+    appInterface.update('deck', deck);
+    appInterface.update('dealer', dealer);
+    appInterface.update('currentPlayer', currentPlayer);
+
     createDeck();
     shuffle();
     createPlayers();
     dealHands();
     updatePoints();
-    appInterface.update("gameState", "on");
-    appInterface.update("gamePlayers", gamePlayers);
-    appInterface.update("dealer", dealer);
-    console.log("restarting game........");
-  }
-  function updateGame(state) {
+
+    appInterface.update('gameState', 'on');
+    appInterface.update('gamePlayers', gamePlayers);
+    appInterface.update('dealer', dealer);
+    console.log('restarting game........');
+  };
+  const updateGame = (state) => {
     loadPlayers();
     if (state.gameState) {
       gameState = state.gameState;
@@ -215,41 +230,67 @@
       currentPlayer = state.currentPlayer;
     }
     currentPlayer = state.currentPlayer;
-  }
+  };
+
   appInterface.onChange(updateGame);
   appInterface.onLoad((state) => {
     updateGame(state);
     loaded = true;
   });
   appInterface.onPlayerJoined((player) => {
-    // console.log(`Welcome ${player.name} (from ${localPlayer?.name || 'Unknown'})!`);
-    // Add them to the players and gamePlayers list
-    // TODO: Consider active vs non-active rounds
-    // players.push(player);
-    // gamePlayers.push({
-    //   name: player.name,
-    //   id: player.id,
-    //   points: 0,
-    //   hand: [],
-    //   result: null,
-    // });
-    // appInterface.update('gamePlayers', gamePlayers);
+    switch (gameState) {
+      case 'on':
+        // Preemptively add them to players
+        players.push(player);
+
+        // Add them to the gamePlayers list but as inactive
+        const gamePlayer = {
+          name: player.name,
+          id: player.id,
+          sessionId: player.sessionId,
+          points: 0,
+          hand: [],
+          state: 'waiting',
+          result: null,
+        };
+        gamePlayers.push(gamePlayer);
+        appInterface.update('gamePlayers', gamePlayers);
+        break;
+      case 'off':
+        // Reload the players list
+        loadPlayers();
+        break;
+    }
   });
-  appInterface.onPlayerLeft((player) => {
-    // console.log(`Bye ${player.name} (from ${localPlayer?.name || 'Unknown'})!`);
-    // players = players.filter((p) => p.id !== player.id);
-    // gamePlayers = gamePlayers.filter((g) => g.id !== player.id);
-    // appInterface.update('gamePlayers', gamePlayers);
-    // if (currentPlayer >= gamePlayers.length) {
-    //   checkDealer();
-    // }
+  appInterface.onPlayerLeft(({ sessionId }) => {
+    switch (gameState) {
+      case 'on':
+        // Preemptively remove them from players
+        players = players.filter((p) => p.sessionId !== sessionId);
+
+        // If they exist in the gamePlayers list then mark them as inactive
+        const gamePlayer = gamePlayers.find((p) => p.sessionId === sessionId);
+        if (gamePlayer) {
+          gamePlayer.state = 'left';
+          appInterface.update('gamePlayers', gamePlayers);
+
+          // If they are the active player then move to the next player
+          if (gamePlayers[currentPlayer].id === gamePlayer.id) {
+            nextPlayer();
+          }
+        }
+        break;
+      case 'off':
+        // Reload the players list
+        loadPlayers();
+        break;
+    }
   });
-  async function loadPlayers() {
-    players = await appInterface.getPlayers();
-    filtered = players.filter((x) => !!x);
+  const loadPlayers = async () => {
+    players = (await appInterface.getPlayers()).filter((x) => !!x);
+    localPlayer = players.find((player) => player.localPlayer);
     arePlayersLoaded = true;
-    localPlayer = filtered.find((player) => player.localPlayer);
-  }
+  };
 </script>
 
 <style>
@@ -262,11 +303,6 @@
     width: 100%;
     height: 140px;
     border-radius: 10px;
-  }
-  .header {
-    width: 100%;
-    color: white;
-    padding: 5px;
   }
   .player {
     color: white;
@@ -324,7 +360,7 @@
       {:else}
         <div class="player dealer">
           <b>BLACKJACK</b>
-          {#if gameState == 'off'}
+          {#if gameState === 'off'}
             <button on:click={restartGame}>START</button>
           {:else}
             <b>{gamePlayers[currentPlayer].name}'s turn</b>
@@ -333,29 +369,43 @@
         {#each gamePlayers as player}
           <div class="player">
             <b>{player.name} - {player.points}</b>
-            {#each player.hand as hand}
-              {#if hand.value == 10}
-                <img
-                  class="card"
-                  src="https://deckofcardsapi.com/static/img/0{hand.suit}.png" />
-              {:else}
-                <img
-                  class="card"
-                  src="https://deckofcardsapi.com/static/img/{hand.value}{hand.suit}.png" />
-              {/if}
-            {/each}
-            <b>
-              {#if player.result}{player.result}{/if}
-            </b>
-            {#if gamePlayers[currentPlayer].id == localPlayer.id}
-              {#if gameState != 'off'}
-                {#if player.id == localPlayer.id}
-                  <div class="controls">
-                    <button on:click={hitMe}>Hit</button>
-                    <button on:click={stay}>Stay</button>
-                  </div>
+            {#if player.state === 'playing'}
+              {#each player.hand as hand}
+                {#if hand.value * 1 === 10}
+                  <img
+                    class="card"
+                    alt="0{hand.suit}"
+                    src="https://deckofcardsapi.com/static/img/0{hand.suit}.png" />
+                {:else}
+                  <img
+                    class="card"
+                    alt="{hand.value}{hand.suit}"
+                    src="https://deckofcardsapi.com/static/img/{hand.value}{hand.suit}.png" />
+                {/if}
+              {/each}
+              <b>
+                {#if player.result}{player.result}{/if}
+              </b>
+              {#if gamePlayers[currentPlayer].id === localPlayer.id}
+                {#if gameState !== 'off'}
+                  {#if player.id === localPlayer.id}
+                    <div class="controls">
+                      <button on:click={hitMe}>Hit</button>
+                      <button on:click={stay}>Stay</button>
+                    </div>
+                  {/if}
                 {/if}
               {/if}
+            {/if}
+            {#if player.state === 'left'}
+              <b>Left round</b>
+            {/if}
+            {#if player.state === 'waiting'}
+              <b>
+                Waiting for
+                <br />
+                next round
+              </b>
             {/if}
           </div>
         {/each}
@@ -363,26 +413,30 @@
           {#if dealer.points}
             <b>dealer - {dealer.points}</b>
             {#each dealer.hand as card}
-              {#if card.value == 10}
+              {#if card.value * 1 === 10}
                 <img
                   class="card"
+                  alt="0{card.suit}"
                   src="https://deckofcardsapi.com/static/img/0{card.suit}.png" />
               {:else}
                 <img
                   class="card"
+                  alt="{card.value}{card.suit}"
                   src="https://deckofcardsapi.com/static/img/{card.value}{card.suit}.png" />
               {/if}
             {/each}
           {:else}
             <b>dealer</b>
             {#if dealer.hand[0]}
-              {#if dealer.hand[0].value == 10}
+              {#if dealer.hand[0].value * 1 === 10}
                 <img
                   class="card"
+                  alt="0{dealer.hand[0].suit}"
                   src="https://deckofcardsapi.com/static/img/0{dealer.hand[0].suit}.png" />
               {:else}
                 <img
                   class="card"
+                  alt="{dealer.hand[0].value}{dealer.hand[0].suit}"
                   src="https://deckofcardsapi.com/static/img/{dealer.hand[0].value}{dealer.hand[0].suit}.png" />
               {/if}
             {/if}
