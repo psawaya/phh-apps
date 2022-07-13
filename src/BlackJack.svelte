@@ -238,22 +238,33 @@
     loaded = true;
   });
   appInterface.onPlayerJoined((player) => {
+    if (!player) {
+      return;
+    }
+
     switch (gameState) {
       case 'on':
-        // Preemptively add them to players
-        players.push(player);
+        // Preemptively add them to players (if they don't exist already)
+        if (!players.some((p) => p && p.id === player.id)) {
+          players.push(player);
+        }
 
         // Add them to the gamePlayers list but as inactive
-        const gamePlayer = {
-          name: player.name,
-          id: player.id,
-          sessionId: player.sessionId,
-          points: 0,
-          hand: [],
-          state: 'waiting',
-          result: null,
-        };
-        gamePlayers.push(gamePlayer);
+        const existing = gamePlayers.find((p) => p && p.id === player.id);
+        if (existing) {
+          existing.state = 'waiting';
+        } else {
+          const gamePlayer = {
+            name: player.name,
+            id: player.id,
+            sessionId: player.sessionId,
+            points: 0,
+            hand: [],
+            state: 'waiting',
+            result: null,
+          };
+          gamePlayers.push(gamePlayer);
+        }
         appInterface.update('gamePlayers', gamePlayers);
         break;
       case 'off':
@@ -263,19 +274,28 @@
     }
   });
   appInterface.onPlayerLeft(({ sessionId }) => {
+    if (!sessionId) {
+      return;
+    }
+
     switch (gameState) {
       case 'on':
         // Preemptively remove them from players
-        players = players.filter((p) => p.sessionId !== sessionId);
+        players = players.filter((p) => p && p.sessionId !== sessionId);
 
         // If they exist in the gamePlayers list then mark them as inactive
-        const gamePlayer = gamePlayers.find((p) => p.sessionId === sessionId);
+        const gamePlayer = gamePlayers.find(
+          (p) => p && p.sessionId === sessionId
+        );
         if (gamePlayer) {
           gamePlayer.state = 'left';
           appInterface.update('gamePlayers', gamePlayers);
 
           // If they are the active player then move to the next player
-          if (gamePlayers[currentPlayer].id === gamePlayer.id) {
+          if (
+            !gamePlayers[currentPlayer] ||
+            gamePlayers[currentPlayer].id === gamePlayer.id
+          ) {
             nextPlayer();
           }
         }
@@ -386,7 +406,7 @@
               <b>
                 {#if player.result}{player.result}{/if}
               </b>
-              {#if gamePlayers[currentPlayer].id === localPlayer.id}
+              {#if gamePlayers[currentPlayer] && gamePlayers[currentPlayer].id === localPlayer.id}
                 {#if gameState !== 'off'}
                   {#if player.id === localPlayer.id}
                     <div class="controls">
